@@ -1,0 +1,57 @@
+# rate limiting see: https://www.nginx.com/blog/rate-limiting-nginx/
+
+limit_req_zone $binary_remote_addr zone=mylimit:3m rate=50r/s;
+
+
+upstream web {
+  server localhost:8000;
+}
+
+
+server {
+  listen 80;
+  server_name example.com www.example.com;
+  client_max_body_size 100M;
+
+
+  location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+  location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name example.com www.example.com;
+    client_max_body_size 100M;
+
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    location / {
+          proxy_pass http://web;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Host $server_name;
+          proxy_set_header Host $http_host;
+          proxy_redirect off;
+
+
+          proxy_connect_timeout   180;
+          proxy_send_timeout      180;
+          proxy_read_timeout      180;
+          send_timeout            180;
+          client_body_timeout     180;
+    }
+
+    location /media/ {
+          alias /web/media/;
+    }
+
+    location /static/ {
+          alias /web/staticfiles/;
+    }
+}
