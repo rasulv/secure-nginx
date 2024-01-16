@@ -42,4 +42,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests.
 
 
 ### License
-This project is licensed under the MIT License - see the [LICENSE](?tab=License-1-ov-file) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/rasulv/secure-nginx?tab=MIT-1-ov-file) file for details.
